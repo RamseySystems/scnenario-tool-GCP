@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="./CSS/style.css" type="text/css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+</head>
+
+<body>
+    <!-- Update to bootstrap 5 -->
+    <nav class="navbar navbar-dark bg-dark navbar-expand">
+        <a class="navbar-brand mb-0 h1">
+            <i class="bi bi-person" height="30" width="30" style="padding-right: 20px;" id="homeIcon" onclick="location.reload()"></i> Simulation viewer
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item dropdown">
+                    <a href="#" class="nav-link dropdown-toggle" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Patients</a>
+                    <ul class="dropdown-menu" aria-labelledby="navbarDropdown" id="dropdown">
+                        {% for name in personae %}
+                            <li>
+                                <a class="dropdown-item" id="{{ name[:-5] }}">{{ name[:-5] }}</a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </li>
+                <li class="nav-item active">
+                    <a href="#" class="nav-link" id="stories">Story</a>
+                </li>
+            </ul>
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a href="#" class="nav-link" id="name">Patient</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <div id="storyBox">
+        <div id="storyScreen">
+            <iframe src="" frameborder="0" id="storyViewer"></iframe>
+        </div>
+    </div>
+
+    <div class="container-flex" id="main">
+        <div class="main row" id="container">
+
+            <!--  Left event log iframe  -->
+            <div class="left col-12 col-lg-6 order-1 order-lg-1" id="left">
+                <nav id="eventLogHeader">
+                    <button class="leftTab" id="leftTabs">Event Log</button>
+                </nav>
+                <iframe src="eventLogFiller.html" class="data" style="border: 3px solid rgb(69, 94, 110);" height="100%" width="100%" id="leftTable"></iframe>
+            </div>
+
+            <!--  Right data and tabs  -->
+
+            <div class="right col-12 col-lg-6 order-3 order-lg-2" id="right">
+                <nav class="tabs">
+                    <button class="tab shown" id="rendered">Rendered</button>
+                    <button class="tab shown" id="json">JSON</button>
+                </nav>
+                <iframe src="dataViewFiller.html" style="border: 3px solid rgb(69, 94, 110);" name="iframe_a" height="100%" width="100%" id="rightData" class="data"></iframe>
+            </div>
+
+            <div class="buttons col-12 order-2 order-lg-3" id="buttons">
+                <i class="bi bi-arrow-up-right-square d-none d-lg-inline" id="resizeEventLog" style="cursor: pointer;"></i>
+                <i class="bi bi-arrow-up-left-square d-none d-lg-inline" id="resizeDataView" style="cursor: pointer;"></i>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js" integrity="sha384-7+zCNj/IqJ95wo16oMtfsKbZ9ccEh31eOz1HGyDuCQ6wgnyJNSYdrPa03rtR1zdB" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js" integrity="sha384-QJHtvGhmr9XOIpI6YVutG+2QOK9T+ZnN4kzFN1RtK3zEFEIsxhlmWl5/YESvpZ13" crossorigin="anonymous"></script>
+    <script>
+        /* Close tabs */
+        document.getElementById('rendered').style.display = 'none'
+        document.getElementById('json').style.display = 'none'
+
+        document.getElementById("resizeEventLog").onclick = resize_event_log;
+        document.getElementById("resizeDataView").onclick = resize_data_view;
+
+        function resize_event_log() {
+            if (document.getElementById("resizeEventLog").classList == "bi bi-arrow-up-right-square d-none d-lg-inline") {
+                document.getElementById("left").className = "left col-12";
+                document.getElementById("right").className = "right d-lg-none";
+                document.getElementById("resizeEventLog").classList = "bi bi-arrow-down-left-square";
+            } else {
+                document.getElementById("left").className = "left col-12 col-lg-6 order-1 order-sm-1 order-lg-1";
+                document.getElementById("right").className = "right col-12 col-lg-6 order-3 order-sm-3 order-lg-2";
+                document.getElementById("resizeEventLog").classList = "bi bi-arrow-up-right-square d-none d-lg-inline";
+            };
+        };
+
+        function resize_data_view() {
+            if (document.getElementById("resizeDataView").classList == "bi bi-arrow-up-left-square d-none d-lg-inline") {
+                document.getElementById("right").className = "right col-12";
+                document.getElementById("left").className = "left d-lg-none";
+                document.getElementById("resizeDataView").classList = "bi bi-arrow-down-right-square d-none d-lg-inline";
+            } else {
+                document.getElementById("left").className = "left col-12 col-lg-6 order-1 order-sm-1 order-lg-1";
+                document.getElementById("right").className = "right col-12 col-lg-6 order-3 order-sm-3 order-lg-2";
+                document.getElementById("resizeDataView").classList = "bi bi-arrow-up-left-square d-none d-lg-inline";
+            };
+        };
+
+
+        /* reset the colors and views */
+
+        function reset() {
+            document.getElementById("buttons").style.display = "block";
+            document.getElementById("stories").style.display = "block";
+            document.getElementById('leftTabs').style.display = 'inline-block';
+            document.getElementById('rightData').src = './dataViewFiller.html';
+            document.getElementById('rendered').style.display = 'none';
+            document.getElementById('json').style.display = 'none';
+
+            //document.getElementById('rendered').style.display = 'inline-block';
+            //document.getElementById('json').style.display = 'inline-block';
+
+            document.getElementById("rendered").style.backgroundColor = "rgb(69, 94, 110)";
+            document.getElementById("rendered").style.color = "white";
+            document.getElementById("json").style.backgroundColor = "whitesmoke";
+            document.getElementById("json").style.color = "rgb(69, 94, 110)";
+        };
+
+        function story(name) {
+            document.getElementById("storyBox").style.display = "block";
+            let path = './Stories/' + name + 'Story.html';
+            document.getElementById("storyViewer").src = path;
+        };
+
+        {% for name in personae %}
+        document.getElementById('{{ name[:-5] }}').addEventListener('click', function() {
+            document.getElementById("leftTable").src = "./logs/{{ name[:-5] }}_log.html";
+            document.getElementById("name").innerHTML = "{{ name[:-5] }}";
+            reset();
+            document.getElementById("rightData").src = "dataViewFiller.html"
+            story("{{ name[:-5] }}_story");
+        }) 
+        {% endfor %}
+
+
+
+        /* stories pop up */
+
+        function story(name) {
+            document.getElementById("storyBox").style.display = "block";
+            let path = './Stories/' + name + '.html';
+            document.getElementById("storyViewer").src = path;
+        };
+
+
+        document.getElementById('stories').addEventListener("click", function() {
+            if (document.getElementById("storyBox").style.display == "none") {
+                //Show pop up box
+                document.getElementById("storyBox").style.display = "block";
+                //Add text
+                var name = document.getElementById("name").innerHTML;
+                let path = './Stories/' + name + '_story.html';
+                document.getElementById("storyViewer").src = path;
+            } else {
+                //Hide story box
+                document.getElementById("storyBox").style.display = "none";
+            };
+        });
+
+        //Closing story pop up
+        document.getElementById("storyBox").addEventListener("click", function() {
+            document.getElementById("storyBox").style.display = "none"
+            var iFrame = document.getElementById("leftTable")
+            var log = iFrame.contentDocument || iFrame.contentWindow.document;
+        });
+
+
+
+        /* Tabs */
+
+        //Functions
+        function changeTabColors(mainTab) {
+            if (mainTab == 'rendered') {
+                document.getElementById("rendered").style.backgroundColor = "rgb(69, 94, 110)";
+                document.getElementById("rendered").style.color = "white";
+                document.getElementById("json").style.backgroundColor = "whitesmoke";
+                document.getElementById("json").style.color = "rgb(69, 94, 110)";
+            } else {
+                document.getElementById("json").style.backgroundColor = "rgb(69, 94, 110)";
+                document.getElementById("json").style.color = "whitesmoke";
+                document.getElementById("rendered").style.backgroundColor = "whitesmoke";
+                document.getElementById("rendered").style.color = "rgb(69, 94, 110)";
+            };
+        };
+
+        function changeSource(source) {
+            //Get old source and split it at / into an array
+            var oldSource = document.getElementById('rightData').src
+            var split = oldSource.split('/')
+
+            var split_length = split.length
+
+            var split1 = split[split_length - 4]
+            var split2 = split[split_length - 3]
+
+            /* When running locally, use non prsb line */
+            // var fullStart = `http://127.0.0.1:5503/${split1}/${split2}`
+            // var fullStart = `https://theprsb.org/diabetessimulation/${split1}/${split2}`
+            // https://theprsb.org/diabetessimulation/data/Claire/Full_Data/About_Me.html
+            // split - https, '', theprsb.org, diabetessimulation,  data, Claire, Full_Data, About_Me.html
+
+            var fullStart = `${split.slice(0, -4).join("/")}/${split1}/${split2}`
+
+            //End split
+            console.log(fullStart)
+            var end = split.slice(-1)
+            console.log(end)
+
+            //Determine folder
+            if (source == 'rendered') {
+                let convertedEnd = end[0].slice(0, -4) + 'html'
+                var new_source = fullStart + '/rendered/' + convertedEnd
+            } else if (source == 'JSON') {
+                let convertedEnd = end[0].slice(0, -4) + 'json'
+                var new_source = fullStart + '/json/' + convertedEnd
+            };
+
+            document.getElementById("rightData").src = new_source
+        };
+
+
+        document.getElementById("rendered").addEventListener('click', function() {
+            //change tab colors
+            changeTabColors("rendered");
+            //Change iframe src
+            changeSource("rendered");
+        });
+
+        document.getElementById("json").addEventListener('click', function() {
+            //change tab colors
+            changeTabColors("json");
+            //Change iframe src
+            changeSource("JSON");
+        });
+    </script>
+</body>
+
+</html>

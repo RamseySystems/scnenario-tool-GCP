@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload file</title>
+    <style>
+        body {
+            max-width: 500px;
+            margin: auto;
+        }
+        
+        form {
+            margin: 0;
+            position: absolute;
+            top: 50%;
+            -ms-transform: translateY(-30%);
+            transform: translateY(-30%);
+        }
+        
+        form input {
+            font-size: 25px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>An error occurred</h1>
+    <p>{{ line }}</p>
+    <p>{{ error }}</p>
+    <form action="/upload" method="POST" enctype="multipart/form-data">
+        <input type="file" name="file" multiple />
+        <input type="submit" value="Upload">
+    </form>
+</body>
+
+</html>

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        * {
+            font-family: Arial;
+        }
+        
+        table {
+            border-collapse: collapse;
+            border-radius: 5px;
+            box-shadow: 0 0 4px rgba(0, 0, 0, 0.25);
+            overflow: hidden;
+            font-size: 14pt;
+            width: 100%;
+        }
+        
+        th {
+            background: rgb(69, 94, 110);
+            color: #ffffff;
+            text-align: left;
+        }
+        
+        th,
+        td {
+            padding: 10px 20px;
+        }
+        
+        tr:nth-child(even) {
+            /* Custom color not PRSB */
+            background: rgb(203, 216, 220);
+        }
+        
+        tr:nth-child(odd) {
+            background: rgb(217, 229, 233);
+        }
+        
+        tr[data-file] {
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        tr:hover #button {
+            display: block;
+        }
+        
+        #comment {
+            width: 20px;
+        }
+        
+        .textarea {
+            display: block;
+            width: 100%;
+            overflow: hidden;
+            resize: both;
+            min-height: 40px;
+            line-height: 20px;
+        }
+        
+        #filler {
+            width: 55vw;
+        }
+        
+        #header1 {
+            width: 20vw;
+        }
+    </style>
+</head>
+
+<body>
+    <table>
+        <thead>
+            <tr>
+
+                <th id="header1">﻿Date-Time</th>
+
+                <th id="header2">Description</th>
+
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in data %} {% if item.sheet is not none %}
+            <tr data-file="./data/{{ name }}/rendered/{{ item.sheet }}.html">
+                {% else %}
+                <tr>
+                    {% endif %}
+                    <td>{{ item.time }}</td>
+                    <td>{{ item.event }}</td>
+                </tr>
+
+                {% endfor %}
+        </tbody>
+    </table>
+    <h1 id="hidden" style="display: none;">true</h1>
+    <script>
+        /* Get the first item in the log that has a link */
+
+        const rows = document.querySelectorAll('tr[data-file]');
+        var first_link = rows[0]
+
+        var hidden = document.getElementById('hidden');
+        var prev_colour = first_link.style.backgroundColor;
+        var previous_row = first_link
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const rows = document.querySelectorAll("tr[data-file]");
+
+            rows.forEach(row => {
+                row.addEventListener("click", () => {
+                    // Set frst to false to signify that this isnt the first time the log has been shown (for story pop up error)
+                    hidden.innerHTML = "false"
+
+                    previous_row.style.backgroundColor = prev_colour
+
+                    previous_row = row
+                    prev_colour = row.style.backgroundColor
+
+                    // Change current rows colour
+                    row.style.backgroundColor = "#ADB3B3"
+
+                    // Reset tabs
+                    window.parent.document.getElementById('rightData').src = row.dataset.file;
+                    window.parent.document.getElementById('rendered').style.display = 'inline-block';
+                    window.parent.document.getElementById('json').style.display = 'inline-block';
+
+                    window.parent.document.getElementById("rendered").style.backgroundColor = "rgb(69, 94, 110)";
+                    window.parent.document.getElementById("rendered").style.color = "white";
+                    window.parent.document.getElementById("json").style.backgroundColor = "whitesmoke";
+                    window.parent.document.getElementById("json").style.color = "rgb(69, 94, 110)";
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>

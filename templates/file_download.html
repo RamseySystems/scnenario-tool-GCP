@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Download</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@300&display=swap');
+        html,
+        body {
+            height: 100%;
+            font-family: 'Roboto Mono', monospace;
+        }
+        
+        html {
+            display: table;
+            margin: auto;
+        }
+        
+        body {
+            padding-top: 20px;
+            display: table-cell;
+            vertical-align: top;
+        }
+        
+        #launch {
+            float: right;
+        }
+    </style>
+</head>
+
+<body>
+    <a href="/download">Download</a> {% if xlsx_files == True %}
+    <a href="/scenario_viewer/index.html" id="launch">Launch</a> {% endif %}
+
+    <div class="container">
+        {% for object in summaries %}
+        <h1 class="file_path">{{ object.file_path }}</h1>
+        {% for sheet in object.sheets %} {% if sheet.invalid_paths|length != 0 %}
+        <h2 class="sheet_name">{{ sheet.sheet_name }}</h2>
+        {% endif %} {% for path in sheet.invalid_paths %}
+        <p class="path">{{ path }}</p>
+        {% endfor %} {% endfor %} {% endfor %}
+    </div>
+
+</body>
+
+</html>

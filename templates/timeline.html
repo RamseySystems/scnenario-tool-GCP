@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        * {
+            font-family: Arial;
+        }
+        
+        table {
+            border-collapse: collapse;
+            border-radius: 5px;
+            box-shadow: 0 0 4px rgba(0, 0, 0, 0.25);
+            overflow: hidden;
+            font-size: 14pt;
+            width: 100%;
+        }
+        
+        th {
+            background: rgb(69, 94, 110);
+            color: #ffffff;
+            text-align: left;
+        }
+        
+        th,
+        td {
+            padding: 10px 20px;
+        }
+        
+        tr:nth-child(even) {
+            /* Custom color not PRSB */
+            background: rgb(203, 216, 220);
+        }
+        
+        tr:nth-child(odd) {
+            background: rgb(217, 229, 233);
+        }
+        
+        tr[data-file] {
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        tr:hover #button {
+            display: block;
+        }
+        
+        #comment {
+            width: 20px;
+        }
+        
+        .textarea {
+            display: block;
+            width: 100%;
+            overflow: hidden;
+            resize: both;
+            min-height: 40px;
+            line-height: 20px;
+        }
+        
+        #filler {
+            width: 55vw;
+        }
+        
+        #header1 {
+            width: 20vw;
+        }
+    </style>
+</head>
+
+<body>
+    <table>
+        <thead>
+            <tr>
+
+                <th id="header1">﻿Date-Time</th>
+
+                <th id="header2">Event</th>
+
+            </tr>
+        </thead>
+        <tbody>
+            {% for obj in data %}
+            <tr>
+                <td>{{ obj.time }}</td>
+
+                {% if obj.sheet %}
+                <td id="{{ obj.sheet }}"><strong>{{ obj.event }}</strong></td>
+                {% else %}
+                <td>{{ obj.event }}</td>
+                {% endif %}
+            </tr>
+            {% endfor %}
+        </tbody>
+
+    </table>
+</body>
+
+</html>

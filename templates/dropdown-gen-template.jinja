@@ -1,0 +1,13 @@
+let html = ''
+{% set count = array|length %}
+const array = [{% for item in array %}"{{ item }}"{% if loop.index != array|length %}, {% endif %}{% endfor %}]
+
+for (const file of array) {
+    html += `
+        <li>
+            <a class='dropdown-item' id='${file}'>${file}</a>
+        </li>
+    `
+}
+
+document.getElementById('dropdown').innerHTML = html

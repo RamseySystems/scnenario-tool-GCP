@@ -1,0 +1,223 @@
+* {
+    font-family: Arial;
+}
+
+
+/* Disable scroll bars */
+
+html {
+    -ms-overflow-style: none;
+    /* for Internet Explorer, Edge */
+    scrollbar-width: none;
+    /* for Firefox */
+    overflow-y: scroll;
+}
+
+html::-webkit-scrollbar {
+    display: none;
+    /* for Chrome, Safari, and Opera */
+}
+
+body {
+    width: 100vw;
+}
+
+html {
+    background-color: rgb(233, 233, 233);
+    margin: 0%;
+}
+
+#homeIcon:hover {
+    cursor: pointer;
+}
+
+.data {
+    height: 75vh;
+    overflow-x: hidden;
+    font-size: 15px;
+    width: 100%;
+}
+
+#buttons {
+    text-align: center;
+    font-size: 25px;
+    padding-top: 10px;
+    display: none;
+}
+
+#resizeEventLog {
+    margin-right: 2%;
+}
+
+.header {
+    text-align: center;
+    font-size: 30px;
+}
+
+nav {
+    padding: 0 5%;
+    margin-bottom: 0%;
+}
+
+.main {
+    background-color: rgb(233, 233, 233);
+    padding: 10px;
+}
+
+iframe {
+    margin-left: auto;
+    margin-right: auto;
+    background-color: whitesmoke;
+    border-radius: 5px;
+    padding: 2px;
+}
+
+#name {
+    font-weight: bold;
+}
+
+#stories {
+    display: none;
+    float: right;
+}
+
+#name {
+    color: rgb(255, 255, 255);
+    font-size: 23px;
+}
+
+
+/* stories overlay */
+
+#storyBox {
+    position: fixed;
+    /* Sit on top of the page content */
+    display: none;
+    /* Hidden by default */
+    width: 100%;
+    /* Full width (cover the whole page) */
+    height: 100%;
+    /* Full height (cover the whole page) */
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.7);
+    /* Black background with opacity */
+    z-index: 2;
+    /* Specify a stack order in case you're using a different order for other elements */
+    cursor: pointer;
+    /* Add a pointer on hover */
+}
+
+#storyScreen {
+    width: 70vw;
+    height: 70vh;
+    margin: auto;
+    margin-top: 7%;
+}
+
+#storyViewer {
+    border-radius: 10px;
+    width: 100%;
+    height: 100%;
+}
+
+
+/* Tabs */
+
+.tab {
+    border-top: 3px solid rgb(69, 94, 110);
+    border-left: 3px solid rgb(69, 94, 110);
+    border-right: 3px solid rgb(69, 94, 110);
+    border-bottom: none;
+    border-radius: 5px 5px 0px 0px;
+    font-size: 15px;
+    font-weight: 700;
+    padding-bottom: 20px;
+    height: 40px;
+    width: 100px;
+}
+
+.leftTab {
+    border-top: 3px solid rgb(69, 94, 110);
+    border-left: 3px solid rgb(69, 94, 110);
+    border-right: 3px solid rgb(69, 94, 110);
+    border-bottom: none;
+    border-radius: 5px 5px 0px 0px;
+    font-size: 15px;
+    font-weight: 700;
+    padding-bottom: 20px;
+    height: 40px;
+}
+
+#eventLogHeader {
+    float: left;
+    padding-left: 15px;
+    height: 40px;
+}
+
+.tabs {
+    float: right;
+    padding-right: 15px;
+    height: 40px;
+}
+
+#leftTabs {
+    background-color: rgb(69, 94, 110);
+    color: whitesmoke;
+    display: none;
+    font-size: 12px;
+    line-height: 15px;
+}
+
+.tab:hover {
+    background-color: rgb(243, 243, 243);
+}
+
+#fullData {
+    color: whitesmoke;
+    background-color: rgb(69, 94, 110);
+    display: none;
+    font-size: 12px;
+    line-height: 15px;
+}
+
+#views {
+    color: rgb(69, 94, 110);
+    background-color: whitesmoke;
+    display: none;
+    font-size: 12px;
+    line-height: 15px;
+}
+
+#json {
+    color: rgb(69, 94, 110);
+    background-color: whitesmoke;
+    display: none;
+    font-size: 12px;
+    line-height: 15px;
+}
+
+
+/* media queries */
+
+@media (max-width: 768px) {
+    iframe {
+        padding-bottom: 10px;
+        padding-right: 10px;
+        padding-left: 10px;
+    }
+}
+
+#shiftedNav {
+    display: none;
+    margin-top: 0%;
+    padding-top: 0%;
+}
+
+@media (max-width: 677px) {
+    #shiftedNav {
+        display: block;
+    }
+}

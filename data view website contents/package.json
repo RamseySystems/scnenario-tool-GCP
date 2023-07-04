@@ -1,0 +1,23 @@
+{
+  "dependencies": {
+    "bootstrap-icons": "^1.7.2",
+    "http-server": "^14.1.1"
+  },
+  "name": "website",
+  "description": "To run the website, you must first install the node http-server",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://gitlab.com/FrankieHadwick/data-view-website.git"
+  },
+  "author": "Frankie Hadwick",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://gitlab.com/FrankieHadwick/data-view-website/issues"
+  },
+  "homepage": "https://gitlab.com/FrankieHadwick/data-view-website#readme"
+}

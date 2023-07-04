@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Patient Information</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+</head>
+
+<body>
+
+    {% macro key_format_fix(data) %} {{ data.replace('_', ' ').title() }} {% endmacro %}
+
+
+    <table class="table table-striped">
+        <tbody>
+            {% macro render_list(data, indent=0) %} {% for key, value in data.items() %} {% if value is mapping %}
+
+            <tr>
+                <td style="background-color: rgba(13, 25, 47, 0.516); color: white;  width: 40%;">{{"&nbsp;&nbsp;" * indent}}{{ key_format_fix(key) }}: </td>
+                <td style="background-color: rgba(13, 25, 47, 0.516); color: white;"></td>
+            </tr>
+            {{ render_list(value, indent+4) }} {% elif value is sequence %} {% if value|length > 0 and value[0] is mapping %} {% for item in value %}
+            <tr>
+                <td style="background-color: rgba(13, 25, 47, 0.516); color: white;  width: 40%;">{{"&nbsp;&nbsp;" * indent}}{{ key_format_fix(key) }}: </td>
+                <td style="background-color: rgba(13, 25, 47, 0.516); color: white;"></td>
+            </tr>
+            {{ render_list(item, indent+4) }} {% endfor %} {% else %}
+            <tr>
+                <td width: 40%;>{{"&nbsp;&nbsp;" * indent}}{{ key_format_fix(key) }}: </td>
+                <td> {{ value }} </td>
+            </tr>
+            {% endif %} {% else %}
+
+            <tr>
+                <td width: 40%;>{{"&nbsp;&nbsp;" * indent}}{{ key_format_fix(key) }}: </td>
+                <td> {{ value }} </td>
+            </tr>
+
+            {% endif %} {% endfor %} {% endmacro %} {{ render_list(data) }}
+
+        </tbody>
+    </table>
+
+
+</body>
+
+</html>
