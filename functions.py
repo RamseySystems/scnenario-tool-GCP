@@ -100,12 +100,19 @@ def process_file(file, save_dir, upload_folder, standard_path):
         sheets, group_alias_sheet, path_alias_sheet = open_worksheets(
             f'{upload_folder}/{file}')
 
+        # get provenance data
+        provenance_paths = get_standard_paths('Provenance.xlsx', [])
+
         # generate paths for standards
         standard_path_lists = []
         for standard in os.listdir(standard_path):
-            current_standard_path = f'{standard_path}/{standard}'
-            standard_paths = get_standard_paths(current_standard_path)
-            standard_path_lists.append(standard_paths.copy())
+            if standard[0] != '~':
+                current_standard_path = f'{standard_path}/{standard}'
+                standard_paths = get_standard_paths(current_standard_path, provenance_paths)
+                standard_path_lists.append(standard_paths.copy())
+
+        with open('standard_paths', "w") as f:
+            json.dump(standard_path_lists, f, indent=4)
 
         # loop over sheets
         for sheet in sheets:
@@ -281,7 +288,7 @@ def find_cell_location(sheet: dict,
     for row in sheet.iter_rows():
         cell_index = 1
         for cell in row:
-            value = str(cell.value).lower()
+            value = str(cell.value).lower().strip()
             if value == cell_value.lower():
                 return (row_index, cell_index)
             cell_index += 1
@@ -298,7 +305,7 @@ def translate_cell(cell_value: str):
     :param cell_value: the cell value to translate
     :return: :str:
     '''
-    return cell_value.replace(' ', '_')
+    return cell_value.lower()
 
 
 def gen_path_list(sheet: dict,
@@ -406,101 +413,6 @@ def gen_path_list(sheet: dict,
 
     return path_list
 
-
-def gen_path_list_new(sheet: dict,
-                      path_cell: tuple,
-                      value_cell: tuple,
-                      group_alias_sheet: dict,
-                      path_alias_sheet: dict):
-    '''
-    A function that creates a path list array from the paths in a sheet. 
-    Returns an array
-
-    :param sheet: the sheet to get the paths from
-    :param path_cell: the coordinates of the title cell for the paths
-    :param group_alias_sheet: the sheet containing the expanded group aliases
-    :param path_alias_sheet: the sheet containing the path aliases
-    :return: :list:
-    '''
-    path_list = []
-    in_loop = False
-    for cell in sheet.iter_rows(path_cell[0]+1, sheet.max_row, path_cell[1], value_cell[1]):
-        if str(cell[0].value) != 'None':
-
-            # get cell value
-            path = translate_cell(cell[0].value)
-            value = cell[-1].value
-
-            if in_loop:
-                if path != '$loopend':
-                    continue
-                elif path == '$loopend':
-                    in_loop = False
-                    continue
-
-            # take apart path into sections and replace group alias
-            path_split = path.split('.')
-            built_path = []
-            for section in path_split:
-                if '$$' in section:
-
-                    # get the alias name
-                    group_alias_name = section.replace(
-                        '$$', '').strip().lower()
-
-                    # get the expanded list of paths
-                    group_alias_paths = expand_group_alias(
-                        group_alias_name, group_alias_sheet)
-
-                    # loop over list and add each line item to path list
-                    for path in group_alias_paths:
-                        if len(built_path) == 0:
-                            path_list.append(path)
-                        else:
-                            built_path_str = '.'.join(built_path)
-                            path_list.append(f'{built_path_str}.{path}')
-
-                elif '$' in section:
-
-                    # get alias
-                    split_path = section.split('.')
-                    expanded_path = []
-                    for element in split_path:
-                        if '$' in element:
-                            expanded_element = expand_path_alias(
-                                path_alias_sheet, element)
-                            expanded_path.append(expanded_element)
-                        else:
-                            expanded_path.append(element)
-
-                    path_list.append(expanded_path)
-
-                else:
-                    path_list.append(f'{section}.{value}')
-
-            if '$loop' in section:
-
-                in_loop = True
-
-                # get csv name and open it
-                csv_name = section.strip().split()[-1]
-                csv_path = f'./continuous_data/{csv_name}'
-
-                with open(csv_path, 'r') as f:
-                    continuous_data = list(csv.reader(f))
-
-                # get loop lines
-                loop_start = cell[0].row
-                loop_lines = get_loop_lines(
-                    sheet, loop_start, path_cell, value_cell)
-                expanded_loop_lines = expand_loop_lines(
-                    loop_lines, continuous_data, path_alias_sheet, group_alias_sheet)
-
-                [path_list.append(line) for line in expanded_loop_lines]
-
-    return path_list
-
-
 def expand_group_alias(group_alias_name: str,
                        group_alias_sheet: dict):
     '''
@@ -516,12 +428,13 @@ def expand_group_alias(group_alias_name: str,
     group_alias_paths = []
 
     for cell in group_alias_sheet.iter_rows(alias_name_cell[0]+1, group_alias_sheet.max_row, alias_name_cell[1], alias_path_cell[1]+1):
-        alias_name = cell[0].value.lower()
-        alias_path = cell[-2].value
-        alias_value = cell[-1].value
+        if str(cell[0].value) != 'None':
+            alias_name = cell[0].value.lower()
+            alias_path = cell[-2].value
+            alias_value = cell[-1].value
 
-        if alias_name == group_alias_name:
-            group_alias_paths.append([alias_path, alias_value])
+            if alias_name == group_alias_name:
+                group_alias_paths.append([alias_path, alias_value])
 
     return group_alias_paths
 
@@ -697,7 +610,7 @@ def get_path(previous_indent: int, indent: int, path: list, stripped: str):
     return path
 
 
-def get_standard_paths(standard_path: str):
+def get_standard_paths(standard_path: str, provenance_paths: list):
     '''
     This is a function that extracts the paths from a standard in FHIR shorthand format
 
@@ -711,6 +624,7 @@ def get_standard_paths(standard_path: str):
 
     # get row stard and path column
     name_title_cell = find_cell_location(ws, 'Name')
+    info_type_cell = find_cell_location(ws, 'Information Type')
 
     # get single_indent
     single_indent = get_whitespace(
@@ -720,16 +634,36 @@ def get_standard_paths(standard_path: str):
     path_list = []
     path = []
     previous_indent = 0
-    for row in ws.iter_rows(name_title_cell[0]+1, ws.max_row, name_title_cell[1], name_title_cell[1]):
-        line = str(row[0].value)
-        if line != 'None':
-            line_indent = int(get_whitespace(line) / single_indent)
-            stripped = re.sub(
-                re.escape('\\xa0\\xa0\\xa0\\xa0'), r'', line).strip()
-            path = get_path(previous_indent, line_indent, path, stripped)
+    for row in ws.iter_rows(name_title_cell[0]+1, ws.max_row, name_title_cell[1], info_type_cell[1]):
+        if row:
+            line = str(row[0].value)
+            if line != 'None':
+                info_type = str(row[-1].value)
+                line_indent = int(get_whitespace(line) / single_indent)
+                stripped = re.sub(
+                    re.escape('\\xa0\\xa0\\xa0\\xa0'), r'', line).strip()
+                path = get_path(previous_indent, line_indent, path, stripped)
+                str_path = '.'.join(path.copy()).lower().replace('\'', '')
 
-            previous_indent = line_indent
-            path_list.append('.'.join(path.copy()).lower().replace(' ', '_'))
+                if provenance_paths:
+                    with_provenance = []
+                    if info_type == 'Event.Record':
+                        for line in provenance_paths:
+                            if line.split('.')[0] == 'event record':
+                                provenance_line = '.'.join(line.split('.')[1:])
+                                extended_path = f'{str_path}.{provenance_line}'
+                                with_provenance.append(extended_path)
+                    elif info_type == 'Record':
+                        for line in provenance_paths:
+                            if line.split('.')[0] == 'record':
+                                provenance_line = '.'.join(line.split('.')[1:])
+                                extended_path = f'{str_path}.{provenance_line}'
+                                with_provenance.append(extended_path)
+
+                    [path_list.append(line) for line in with_provenance]
+
+                previous_indent = line_indent
+                path_list.append(str_path)
 
     return path_list
 

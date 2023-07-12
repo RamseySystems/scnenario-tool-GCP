@@ -3,6 +3,7 @@ from flask_cors import CORS
 import json
 import os 
 import traceback
+import sys
 import functions as fn
 import shutil
 from jinja2 import Environment, FileSystemLoader
@@ -93,11 +94,13 @@ def upload_file():
             shutil.make_archive(f'{ZIP_FOLDER}/output', 'zip', OUTPUT_FOLDER)
 
 
+        os.system(f'gcloud app deploy {OUTPUT_FOLDER}/website/app.yaml -q --project scenario-viewer')
 
         return render_template('file_download.html', summaries = summaries, xlsx_files = xlsx_files, json_files=json_files)
     except Exception as e:
         print(type(e).__name__)
         print(e.__traceback__.tb_lineno)
+        print(traceback.format_exc())
         return render_template('error.html', line=e.__traceback__.tb_lineno, error=e)
 
 
