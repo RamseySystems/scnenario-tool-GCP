@@ -15,14 +15,14 @@ ALLOWED_EXTENTIONS = {'json','xlsx'}
 OUTPUT_FOLDER = f'{TMP_DIR}/output'
 ZIP_FOLDER = f'{TMP_DIR}/downloadables'
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='static')
 app.secret_key = 'super secret key'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 CORS(app)
 
 @app.route('/')
 def main():
-    return render_template('index.html')
+    return render_template('index.jinja')
 
 @app.route('/scenario_viewer/<path:filename>')
 def serve_static(filename):

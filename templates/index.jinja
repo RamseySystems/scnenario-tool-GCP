@@ -43,10 +43,19 @@
             left: 0;
             right: 0;
         }
+        
+        #loading {
+            width: 35px;
+            height: 35px;
+            display: none;
+            cursor: wait;
+            background: url({{ url_for('static', filename='loading.gif') }}) no-repeat;
+        }
     </style>
 </head>
 
 <body>
+    <div id="loading"></div>
     {% with messages = get_flashed_messages() %} {% if messages %}
     <div class="flashes">
         {% for message in messages %}
@@ -54,10 +63,20 @@
         {% endfor %}
     </div>
     {% endif %} {% endwith %}
-    <form action="/upload" method="POST" enctype="multipart/form-data">
+    <form action="/upload" method="POST" enctype="multipart/form-data" id="form">
         <input type="file" name="file" multiple />
-        <input type="submit" value="Upload">
+        <input type="submit" value="Upload" onclick="loading();">
     </form>
+
+
+
+
+    <script type="text/javascript">
+        function loading() {
+            document.getElementById('form').style.display = 'none';
+            document.getElementById('loading').style.display = 'block';
+        }
+    </script>
 </body>
 
 </html>
