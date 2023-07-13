@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Upload file</title>
+    <title>Upload</title>
     <style>
         body {
             max-width: 500px;
@@ -43,13 +43,16 @@
             left: 0;
             right: 0;
         }
-        
         #loading {
-            width: 35px;
-            height: 35px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            height: 100%;
+            width: 100%;
             display: none;
             cursor: wait;
-            background: url({{ url_for('static', filename='loading.gif') }}) no-repeat;
+            background: url({{ url_for('static', filename='loading.jpg') }}) no-repeat;
         }
     </style>
 </head>
@@ -71,10 +74,10 @@
 
 
 
-    <script type="text/javascript">
+    <script>
         function loading() {
             document.getElementById('form').style.display = 'none';
-            document.getElementById('loading').style.display = 'block';
+            document.getElementById('loading').style.display = 'table';
         }
     </script>
 </body>

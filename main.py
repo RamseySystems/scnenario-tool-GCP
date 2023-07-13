@@ -15,7 +15,7 @@ ALLOWED_EXTENTIONS = {'json','xlsx'}
 OUTPUT_FOLDER = f'{TMP_DIR}/output'
 ZIP_FOLDER = f'{TMP_DIR}/downloadables'
 
-app = Flask(__name__, static_folder='static')
+app = Flask(__name__, static_url_path='/static')
 app.secret_key = 'super secret key'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 CORS(app)
@@ -91,8 +91,6 @@ def upload_file():
 
             # zip archive output folder
             shutil.make_archive(f'{ZIP_FOLDER}/output', 'zip', OUTPUT_FOLDER)
-
-
 
         return render_template('file_download.html', summaries = summaries, xlsx_files = xlsx_files, json_files=json_files)
     except Exception as e:
