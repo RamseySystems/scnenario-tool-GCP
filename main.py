@@ -99,10 +99,10 @@ def upload_file():
                         main_path_list.append(standard_paths.copy())
 
 
-            # process files
+            # process scenario files
             summaries = []
             for file in os.listdir(f'{TMP_DIR}/{session["user"]}/upload'):
-                if file != 'provenance.xlsx' or file[0] != '_':
+                if file != 'Provenance.xlsx' and file[0] != '_':
                     if file.split('.')[-1] != 'json':
                         summary = fn.process_file(file, f'{TMP_DIR}/{session["user"]}/output', f'{TMP_DIR}/{session["user"]}/upload', main_path_list)
                         with open(f'{TMP_DIR}/{session["user"]}/output/{file[:-5]}/summary.json', 'w') as f:
