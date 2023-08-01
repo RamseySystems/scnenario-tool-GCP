@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template, flash, redirect, send_file, send_from_directory, url_for
+from flask import Flask, request, render_template, flash, redirect, send_file, send_from_directory, url_for, session
 from flask_cors import CORS
 import json
 import os 
@@ -10,32 +10,43 @@ from jinja2 import Environment, FileSystemLoader
 
 CURRENT_DIR = os.path.dirname(__file__)
 TMP_DIR = '/tmp'
-
-UPLOAD_FOLDER = f'{TMP_DIR}/uploads'
 ALLOWED_EXTENTIONS = {'json','xlsx'}
-OUTPUT_FOLDER = f'{TMP_DIR}/output'
-ZIP_FOLDER = f'{TMP_DIR}/downloadables'
 
 app = Flask(__name__)
 app.secret_key = 'super secret key'
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['UPLOAD_FOLDER'] = TMP_DIR
 CORS(app)
 
-@app.route('/')
-def main():
+@app.route('/', methods=['GET', 'POST'])
+def get_user():
+    if request.method == 'POST':
+        session['user'] = request.form['user_name']
+        print(session['user'])
+        return redirect(url_for('scenario_tool'))
+    
+    return """
+            <form method="post">
+                <label for="user_name">Enter your name:</label>
+                <input type="text" id="user_name" name="user_name" required />
+                <button type="submit">Submit</button>
+            </form>
+            """
+
+@app.route('/scenario_tool')
+def scenario_tool():
     return render_template('index.html')
 
 @app.route('/scenario_viewer/<path:filename>')
 def serve_static(filename):
-    return send_from_directory(f'{OUTPUT_FOLDER}/website', filename)
+    return send_from_directory(f'{session["user"]}/output/website', filename)
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
     try:
         # clear the temp folders child folders but maintain the structure
-        fn.clear_dir(UPLOAD_FOLDER)
-        fn.clear_dir(OUTPUT_FOLDER)
-        fn.clear_dir(ZIP_FOLDER)
+        fn.clear_dir(f'{TMP_DIR}/{session["user"]}/upload')
+        fn.clear_dir(f'{TMP_DIR}/{session["user"]}/output')
+        fn.clear_dir(f'{TMP_DIR}/{session["user"]}/downloadables')
 
         if request.method == 'POST':
             # if file not uploaded
@@ -55,7 +66,7 @@ def upload_file():
                     print('No selected file')
                     flash('No file selected')
                     return redirect(url_for('main'))
-                file.save(os.path.join(UPLOAD_FOLDER, file.filename))
+                file.save(os.path.join(f'{TMP_DIR}/{session["user"]}/upload', file.filename))
                 if file.filename.split('.')[-1] != 'json':
                     personae.append(file.filename)
                     xlsx_files = True
@@ -64,7 +75,7 @@ def upload_file():
 
             # copy website contents only if needed
             if xlsx_files:
-                shutil.copytree(f'{CURRENT_DIR}/data view website contents', f'{OUTPUT_FOLDER}/website', dirs_exist_ok=True)
+                shutil.copytree(f'{CURRENT_DIR}/data view website contents', f'{TMP_DIR}/{session["user"]}/output/website', dirs_exist_ok=True)
 
                 # create dropdown gen
                 # render log 
@@ -72,29 +83,43 @@ def upload_file():
                 template = env.get_template('index_template.jinja')
                 output = template.render(personae=personae)
 
-                with open(f'{OUTPUT_FOLDER}/website/index.html', 'w') as f:
+                with open(f'{TMP_DIR}/{session["user"]}/output/website/index.html', 'w') as f:
                     f.write(output)
+
+                # get provenance paths
+                if 'Provenance.xlsx' in os.listdir(f'{TMP_DIR}/{session["user"]}/upload'):
+                    provenance_paths = fn.get_standard_paths(f'{TMP_DIR}/{session["user"]}/upload/Provenance.xlsx', [])
+
+                # make a list of standard paths
+                main_path_list = []
+                for file in os.listdir(f'{TMP_DIR}/{session["user"]}/upload'):
+                    if file[0] == '_':
+                        current_standard_path = f'{TMP_DIR}/{session["user"]}/upload/{file}'
+                        standard_paths = fn.get_standard_paths(current_standard_path, provenance_paths)
+                        main_path_list.append(standard_paths.copy())
+
 
             # process files
             summaries = []
-            for file in os.listdir(UPLOAD_FOLDER):
-                if file.split('.')[-1] != 'json':
-                    summary = fn.process_file(file, OUTPUT_FOLDER, UPLOAD_FOLDER, f'{CURRENT_DIR}/standards')
-                    with open(f'{OUTPUT_FOLDER}/{file[:-5]}/summary.json', 'w') as f:
-                        json.dump(summary, f, indent=4)
-                    summaries.append(summary)
-                else:
-                    _ = fn.process_file(file, OUTPUT_FOLDER, UPLOAD_FOLDER, f'{CURRENT_DIR}/standards')
+            for file in os.listdir(f'{TMP_DIR}/{session["user"]}/upload'):
+                if file != 'provenance.xlsx' or file[0] != '_':
+                    if file.split('.')[-1] != 'json':
+                        summary = fn.process_file(file, f'{TMP_DIR}/{session["user"]}/output', f'{TMP_DIR}/{session["user"]}/upload', main_path_list)
+                        with open(f'{TMP_DIR}/{session["user"]}/output/{file[:-5]}/summary.json', 'w') as f:
+                            json.dump(summary, f, indent=4)
+                        summaries.append(summary)
+                    else:
+                        _ = fn.process_file(file, f'{TMP_DIR}/{session["user"]}/output', f'{TMP_DIR}/{session["user"]}/upload', main_path_list)
 
             if xlsx_files:
                 # create excel summary work book
-                fn.create_false_path_excel(OUTPUT_FOLDER, summaries)
+                fn.create_false_path_excel(f'{TMP_DIR}/{session["user"]}/output', summaries)
 
             # zip archive output folder
-            shutil.make_archive(f'{ZIP_FOLDER}/output', 'zip', OUTPUT_FOLDER)
+            shutil.make_archive(f'{TMP_DIR}/{session["user"]}/downloadables/output', 'zip', f'{TMP_DIR}/{session["user"]}/output')
 
 
-        os.system(f'gcloud app deploy {OUTPUT_FOLDER}/website/app.yaml -q --project scenario-viewer')
+        os.system(f'gcloud app deploy {TMP_DIR}/{session["user"]}/output/website/app.yaml -q --project scenario-viewer')
 
         return render_template('file_download.html', summaries = summaries, xlsx_files = xlsx_files, json_files=json_files)
     except Exception as e:
@@ -108,7 +133,7 @@ def upload_file():
 def download():
  #   result = send_from_directory(directory=ZIP_FOLDER, path=f'{ZIP_FOLDER}/output.zip', filename='output.zip')
     try:
-        return  send_file(f'{ZIP_FOLDER}/output.zip', as_attachment=True)
+        return  send_file(f'{TMP_DIR}/{session["user"]}/downloadables/output.zip', as_attachment=True)
     except Exception as e:
         error = traceback.format_exc()
         return render_template('error.html', error=error)   

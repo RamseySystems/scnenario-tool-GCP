@@ -58,7 +58,7 @@ def allowed_file(filename: str, allowed_extentions):
         filename.rsplit('.', 1)[1].lower() in allowed_extentions
 
 
-def process_file(file, save_dir, upload_folder, standard_path):
+def process_file(file, save_dir, upload_folder, standard_path_lists):
     # check for the type of file
     if file.split('.')[-1] == 'json':
         print('JSON')
@@ -99,20 +99,6 @@ def process_file(file, save_dir, upload_folder, standard_path):
         # load each sheet in file intop iterable
         sheets, group_alias_sheet, path_alias_sheet = open_worksheets(
             f'{upload_folder}/{file}')
-
-        # get provenance data
-        provenance_paths = get_standard_paths('Provenance.xlsx', [])
-
-        # generate paths for standards
-        standard_path_lists = []
-        for standard in os.listdir(standard_path):
-            if standard[0] != '~':
-                current_standard_path = f'{standard_path}/{standard}'
-                standard_paths = get_standard_paths(current_standard_path, provenance_paths)
-                standard_path_lists.append(standard_paths.copy())
-
-        with open('standard_paths', "w") as f:
-            json.dump(standard_path_lists, f, indent=4)
 
         # loop over sheets
         for sheet in sheets:
