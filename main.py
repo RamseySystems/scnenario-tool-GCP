@@ -12,7 +12,7 @@ CURRENT_DIR = os.path.dirname(__file__)
 TMP_DIR = '/tmp'
 ALLOWED_EXTENTIONS = {'json','xlsx'}
 
-app = Flask(__name__)
+app = Flask(__name__, static_url_path='/static')
 app.secret_key = 'super secret key'
 app.config['UPLOAD_FOLDER'] = TMP_DIR
 CORS(app)
@@ -34,7 +34,7 @@ def get_user():
 
 @app.route('/scenario_tool')
 def scenario_tool():
-    return render_template('index.html')
+    return render_template('index.jinja')
 
 @app.route('/scenario_viewer/<path:filename>')
 def serve_static(filename):

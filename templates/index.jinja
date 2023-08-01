@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Upload file</title>
+    <title>Upload</title>
     <style>
         body {
             max-width: 500px;
@@ -43,10 +43,22 @@
             left: 0;
             right: 0;
         }
+        #loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            height: 100%;
+            width: 100%;
+            display: none;
+            cursor: wait;
+            background: url({{ url_for('static', filename='loading.jpg') }}) no-repeat;
+        }
     </style>
 </head>
 
 <body>
+    <div id="loading"></div>
     {% with messages = get_flashed_messages() %} {% if messages %}
     <div class="flashes">
         {% for message in messages %}
@@ -54,10 +66,20 @@
         {% endfor %}
     </div>
     {% endif %} {% endwith %}
-    <form action="/upload" method="POST" enctype="multipart/form-data">
+    <form action="/upload" method="POST" enctype="multipart/form-data" id="form">
         <input type="file" name="file" multiple />
-        <input type="submit" value="Upload">
+        <input type="submit" value="Upload" onclick="loading();">
     </form>
+
+
+
+
+    <script>
+        function loading() {
+            document.getElementById('form').style.display = 'none';
+            document.getElementById('loading').style.display = 'table';
+        }
+    </script>
 </body>
 
 </html>
