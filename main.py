@@ -9,19 +9,25 @@ from jinja2 import Environment, FileSystemLoader
 
 CURRENT_DIR = os.path.dirname(__file__)
 TMP_DIR = '/tmp'
-
-UPLOAD_FOLDER = f'{TMP_DIR}/uploads'
 ALLOWED_EXTENTIONS = {'json','xlsx'}
-OUTPUT_FOLDER = f'{TMP_DIR}/output'
-ZIP_FOLDER = f'{TMP_DIR}/downloadables'
+
+
 
 app = Flask(__name__)
 app.secret_key = 'super secret key'
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 CORS(app)
 
 @app.route('/')
 def main():
+    ip_addr = request.remote_addr
+    ip_path = f'{TMP_DIR}/{ip_addr}'
+
+    UPLOAD_FOLDER = f'{ip_path}/uploads'
+    OUTPUT_FOLDER = f'{ip_path}/output'
+    ZIP_FOLDER = f'{ip_path}/downloadables'
+
+    app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
     return render_template('index.html')
 
 @app.route('/scenario_viewer/<path:filename>')
@@ -32,10 +38,14 @@ def serve_static(filename):
 def upload_file():
     try:
         # clear the temp folders child folders but maintain the structure
+        if not os.path.isdir(ip_path):
+            os.mkdir(ip_path)
+
+        fn.clear_dir(ip_path)
         fn.clear_dir(UPLOAD_FOLDER)
         fn.clear_dir(OUTPUT_FOLDER)
         fn.clear_dir(ZIP_FOLDER)
-
+        
         if request.method == 'POST':
             # if file not uploaded
             if 'file' not in request.files:
