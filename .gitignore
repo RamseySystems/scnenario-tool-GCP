@@ -10,3 +10,6 @@ venv*/
 *.pyw
 *.pyc/
 __pycache__/
+
+# Ignore macOS .DS_Store files
+.DS_Store
