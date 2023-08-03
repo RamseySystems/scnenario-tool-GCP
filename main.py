@@ -38,7 +38,7 @@ def scenario_tool():
 
 @app.route('/scenario_viewer/<path:filename>')
 def serve_static(filename):
-    return send_from_directory(f'{session["user"]}/output/website', filename)
+    return send_from_directory(f'{TMP_DIR}/{session["user"]}/output/website', filename)
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
@@ -67,7 +67,7 @@ def upload_file():
                     flash('No file selected')
                     return redirect(url_for('main'))
                 file.save(os.path.join(f'{TMP_DIR}/{session["user"]}/upload', file.filename))
-                if file.filename.split('.')[-1] != 'json':
+                if file.filename.split('.')[-1] != 'json' and file.filename[0] != '_' and file.filename != "Provenance.xlsx":
                     personae.append(file.filename)
                     xlsx_files = True
                 elif file.filename.split('.')[-1] == 'json':
@@ -98,7 +98,6 @@ def upload_file():
                         standard_paths = fn.get_standard_paths(current_standard_path, provenance_paths)
                         main_path_list.append(standard_paths.copy())
 
-
             # process scenario files
             summaries = []
             for file in os.listdir(f'{TMP_DIR}/{session["user"]}/upload'):
@@ -117,9 +116,6 @@ def upload_file():
 
             # zip archive output folder
             shutil.make_archive(f'{TMP_DIR}/{session["user"]}/downloadables/output', 'zip', f'{TMP_DIR}/{session["user"]}/output')
-
-
-        os.system(f'gcloud app deploy {TMP_DIR}/{session["user"]}/output/website/app.yaml -q --project scenario-viewer')
 
         return render_template('file_download.html', summaries = summaries, xlsx_files = xlsx_files, json_files=json_files)
     except Exception as e:
