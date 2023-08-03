@@ -1,0 +1,12 @@
+# Ignore virtual environment folders
+venv/
+venv*/
+
+# Ignore virtual environment files (e.g., pip's 'requirements.txt')
+*.pyc
+*.pyo
+*.pyd
+*.pyz
+*.pyw
+*.pyc/
+__pycache__/
